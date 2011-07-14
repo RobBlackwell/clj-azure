@@ -1,13 +1,7 @@
 # clj-azure
 
-FIXME: write description
+A Windows Azure SDK for Clojure developers.
 
-## Usage
+A work in progress. The core authentication works and there is a proof of concept for listing blobs and containers.
 
-FIXME: write
 
-## License
-
-Copyright (C) 2011 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.

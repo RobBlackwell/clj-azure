@@ -9,6 +9,13 @@
   :table-storage-url
   :queue-storage-url)
 
+(def *devstore*
+  (struct account
+          "devstoreaccount1"
+          "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+          "http://127.0.0.1:10000/devstoreaccount1"
+          "http://127.0.0.1:10002/devstoreaccount1"
+          "http://127.0.0.1:10001/devstoreaccount1"))
 
 (defn now
   "Gets the current date and time in RFC1123 format e.g. Sun, 15 Jun 2008 21:15:07 GMT"
