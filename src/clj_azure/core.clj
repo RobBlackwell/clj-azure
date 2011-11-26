@@ -35,7 +35,6 @@
       (.setTimeZone f (java.util.TimeZone/getTimeZone "GMT"))
       (.format f  (.getTime (java.util.Calendar/getInstance))))))
 
-
 (defn canonicalized-headers
   "See http://msdn.microsoft.com/en-us/library/dd179428.aspx, Constructing the Canonicalized Headers String."
   [request]

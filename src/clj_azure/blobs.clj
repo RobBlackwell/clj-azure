@@ -191,3 +191,8 @@
 
 (defn list-containers [account]
   (get-named-elements (:body (list-containers-raw account))))
+
+(defn get-named-elements [xml]
+  (for [elt (xml-seq (clojure.xml/parse (java.io.ByteArrayInputStream. (.getBytes xml "UTF-8")))) :when (= :Name (:tag elt))] (first (:content elt))))
+
+
