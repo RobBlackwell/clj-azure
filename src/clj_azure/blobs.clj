@@ -1,68 +1,33 @@
+;;;; clj-azure.blobs
+;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
+
 (ns clj-azure.blobs
   "Access to Windows Azure Blob Storage"
   (:require clj-http.client)
   (:require clojure.xml)
   (:use clj-azure.core))
 
-(defn my-wrap-request
-  "Returns a custom HTTP request function constructed from clj-http"
-  [request]
-  (-> request
-    clj-http.client/wrap-redirects
-    ;;wrap-exceptions
-    clj-http.client/wrap-decompression
-    clj-http.client/wrap-input-coercion
-    clj-http.client/wrap-output-coercion
-    clj-http.client/wrap-query-params
-    clj-http.client/wrap-basic-auth
-    clj-http.client/wrap-user-info
-    clj-http.client/wrap-accept
-    clj-http.client/wrap-accept-encoding
-    clj-http.client/wrap-content-type
-    clj-http.client/wrap-method
-    clj-http.client/wrap-url))
-
-(def myrequest
-  (my-wrap-request #'clj-http.core/request))
-
-(defn myprintln [x]
-  (do
-    (println x)
-    x))
-
 ;; Unfortunately the underlying Apache HttpComponents library doesn't
 ;; allow you to set Content-Length explicitly. The Azure signature
 ;; requires it to be known in advance of making the request, so we add
 ;; it to the request and then remove it before making the call.
 
-(defn remove-content-length-header
-  "Removes the Content-Length header from a request"
-  [req]
-  {:method (:method req) :url (:url req) :headers (dissoc (:headers req) "Content-Length") :body (:body req)})
-
-
-(defn get-named-elements [xml]
-  (for [elt (xml-seq (clojure.xml/parse (java.io.ByteArrayInputStream. (.getBytes xml "UTF-8")))) :when (= :Name (:tag elt))] (first (:content elt))))
-
 (defn blob-storage-request 
   "Makes an HTTP request to Windows Azure Blob store"
-  [account method url headers body]
-  (myrequest
-   (remove-content-length-header
-    (myprintln (sign account {:method method
-			      :url url
-			      :headers (conj headers {"x-ms-date" (now) "x-ms-version" x-ms-version })
-			      :body body})))))
+  [account req]
+  (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
+    (clj-http.client/request
+     (remove-header (sign account request) "Content-Length"))))
 
-;; Low Level API
+;; Low Level REST API
 
 (defn list-containers-raw
   "Lists all of the containers in the given storage account."
   [account]
   (blob-storage-request
    account
-   :get
-   (format "%s/?comp=list" (:blob-storage-url account)) {} ""))
+   {:method :get
+    :url (format "%s/?comp=list" (:blob-storage-url account))}))
 
 (defn set-blob-service-properties-raw
   "Sets the properties of the Blob service."
@@ -74,16 +39,18 @@
   [account]
   (blob-storage-request
    account
-   :get
-   (format "%s/?restype=service&comp=properties" (:blob-storage-url account)) {} ""))
+   {:method :get
+    :url (format "%s/?restype=service&comp=properties" (:blob-storage-url account))}))
 
 (defn create-container-raw
   "Creates a new container in the given storage account."
   [account container]
   (blob-storage-request
    account
-   :put
-    (format "%s/%s?restype=container" (:blob-storage-url account) container) {"Content-Length" "0"} ""))
+   {:method :put
+    :url (format "%s/%s?restype=container" (:blob-storage-url account) container)
+    :headers {"Content-Length" "0"}
+    :body ""}))
 
 (defn get-container-properties-raw
   "Returns all properties and metadata on the container."
@@ -100,7 +67,6 @@
   [account container]
   (throw (UnsupportedOperationException.)))
 
-	
 ;; Get Container ACL (REST API)
 ;; Gets the access control list (ACL) and any container-level access policies for the container.
 
@@ -112,31 +78,27 @@
   [account container-name]
   (blob-storage-request
    account
-   :delete
-   (format "%s/%s?restype=container" (:blob-storage-url account) container-name)
-   {"Content-Length" "0"} ""))
+   {:method :delete
+    :url (format "%s/%s?restype=container" (:blob-storage-url account) container-name)
+    :headers {"Content-Length" "0"} }))
 
 (defn list-blobs-raw
   "Lists all of the blobs in the given container."
   [account container]
   (blob-storage-request
    account
-   :get
-   (format "%s/%s?restype=container&comp=list" (:blob-storage-url account) container) {} ""))
+   {:method :get
+    :url (format "%s/%s?restype=container&comp=list" (:blob-storage-url account) container)}))
 
-
-;; Put Blob (REST API)
-;; Creates a new blob or replaces an existing blob within a container.
-
-;; NOT YET WORKING
 (defn put-blob
   "Creates a new blob or replaces an existing blob within a container."
   [account container blob data]
   (blob-storage-request
    account
-   :put
-   (format "%s/%s/%s" (:blob-storage-url account) container blob ) {"Content-Length" (str (count data))} data))
-
+   {:method :put
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )
+    :headers {"Content-Length" (str (count data)) "x-ms-blob-type" "BlockBlob"}
+    :body data}))
 
 ;; Get Blob (REST API)
 ;; Reads or downloads a blob from the system, including its metadata and properties.
@@ -180,19 +142,14 @@
 ;; Get Page Regions (REST API)
 ;;Returns a list of active page ranges for a page blob. Active page ranges are those that have been populated with data.
 
-
-
-
-
-(defn list-blobs [account container]
-  (get-named-elements (:body (list-blobs-raw account container))))
-
 ;; High Level API
 
 (defn list-containers [account]
   (get-named-elements (:body (list-containers-raw account))))
 
-(defn get-named-elements [xml]
-  (for [elt (xml-seq (clojure.xml/parse (java.io.ByteArrayInputStream. (.getBytes xml "UTF-8")))) :when (= :Name (:tag elt))] (first (:content elt))))
+(defn list-blobs [account container]
+  (get-named-elements (:body (list-blobs-raw account container))))
+
+
 
 

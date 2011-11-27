@@ -1,3 +1,6 @@
+;;;; clj-azure.core
+;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
+
 (ns clj-azure.core
   "A Windows Azure SDK for Clojure developers."
   (:use [clojure.string :only [lower-case upper-case]]))
@@ -45,8 +48,10 @@
 
 (defn query-to-map [req]
   "Returns a url query string as a map of parameters and values."
-  (into {} (for [[_ k v] (re-seq #"([^&=]+)=([^&]+)" req)]
-             [(keyword k) v])))
+  (if req
+    (into {} (for [[_ k v] (re-seq #"([^&=]+)=([^&]+)" req)]
+	       [(keyword k) v]))
+    {}))
 
 (defn canonicalized-resource-1
   "See http://msdn.microsoft.com/en-us/library/dd179428.aspx, 2009-09-19 Shared Key Format."
@@ -93,15 +98,31 @@ key is expressed as a Base64 encoded string."
        (org.apache.commons.codec.binary.Base64/encodeBase64
         (.doFinal mac (.getBytes s)))))))
 
+
 (defn sign
   "Returns a new request map with an Authorization header added."
   [account request]
   (let [s (string-to-sign-1 (:account-name account) request)]
-    (println s)
-    { :url (:url request)
-     :method (:method request)
-     :headers (conj (:headers request)
-                    {"Authorization"
-                     (str "SharedKey " (:account-name account) ":"
-                          (hmac-string (:account-key account) s)) })}))
+    (merge {:headers (conj (:headers request)
+			   {"Authorization"
+			    (str "SharedKey " (:account-name account) ":"
+				 (hmac-string (:account-key account) s)) })}
+	   
+	   (dissoc request :headers))))
+
+
+(defn remove-header
+  "Removes the named header from a request"
+  [req header]
+  (merge {:headers (dissoc (:headers req) header) }
+	 (dissoc req :headers)))
+
+(defn add-headers
+  "Adds the specified headers to a request"
+  [req headers]
+  (merge {:headers (merge (:headers req) headers)}
+	 (dissoc req :headers)))
+
+(defn get-named-elements [xml]
+  (for [elt (xml-seq (clojure.xml/parse (java.io.ByteArrayInputStream. (.getBytes xml "UTF-8")))) :when (= :Name (:tag elt))] (first (:content elt))))
 
