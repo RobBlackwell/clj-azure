@@ -1,11 +1,11 @@
-;;;; clj-azure.blobs
+;;;; azure.blobs
 ;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
 
-(ns clj-azure.blobs
+(ns azure.blobs
   "Access to Windows Azure Blob Storage"
   (:require clj-http.client)
   (:require clojure.xml)
-  (:use clj-azure.core))
+  (:use azure.core))
 
 ;; Unfortunately the underlying Apache HttpComponents library doesn't
 ;; allow you to set Content-Length explicitly. The Azure signature

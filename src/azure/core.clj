@@ -1,7 +1,7 @@
 ;;;; clj-azure.core
 ;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
 
-(ns clj-azure.core
+(ns azure.core
   "A Windows Azure SDK for Clojure developers."
   (:use [clojure.string :only [lower-case upper-case]]))
 
