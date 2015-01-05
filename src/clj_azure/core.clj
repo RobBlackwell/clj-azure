@@ -32,9 +32,9 @@
 (def x-ms-version "2011-08-18")
 
 (defn now
-  "Gets the current date and time in RFC1123 format e.g. Sun, 15 Jun 2008 21:15:07 GMT"
+  "Gets the current date and time in RFC1123 format e.g. Sun, 05 Jun 2008 21:15:07 GMT"
   []
-  (let [f (java.text.SimpleDateFormat. "EEE, d MMM yyyy HH:mm:ss z" )]
+  (let [f (java.text.SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z" )]
     (do
       (.setTimeZone f (java.util.TimeZone/getTimeZone "GMT"))
       (.format f  (.getTime (java.util.Calendar/getInstance))))))

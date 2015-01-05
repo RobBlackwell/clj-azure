@@ -16,7 +16,7 @@
   "Makes an HTTP request to Windows Azure Blob store"
   [account req]
   (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
-    (clj-http.client/request
+    (clj-http.client/request 
      (remove-header (sign account request) "Content-Length"))))
 
 ;; Low Level REST API
@@ -50,7 +50,7 @@
    {:method :put
     :url (format "%s/%s?restype=container" (:blob-storage-url account) container)
     :headers {"Content-Length" "0"}
-    :body ""}))
+    :body ""}))(
 
 (defn get-container-properties-raw
   "Returns all properties and metadata on the container."
