@@ -1,8 +1,9 @@
 ;;;; clj-azure.core
 ;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
 
-(ns azure.core
+(ns clj-azure.core
   "A Windows Azure SDK for Clojure developers."
+  (:require [clojure.xml])
   (:use [clojure.string :only [lower-case upper-case]]))
 
 (defstruct account

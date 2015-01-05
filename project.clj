@@ -5,5 +5,7 @@
                  [clj-http "0.5.5"]]
 
   ;; Emit warnings on all reflection calls.
-  :warn-on-reflection true)
+  ;; now deprecated 
+  ;; :warn-on-reflection true
+  )
 

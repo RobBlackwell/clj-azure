@@ -39,6 +39,6 @@
     (is (= (string-to-sign-1 "myaccount" request) result))))
 
 (deftest test-list-containers
-  (is (= ((list-containers-raw *devstore*) :status) 200)))
+  (is (= ((list-containers-raw dev-store-account) :status) 200)))
 
 
