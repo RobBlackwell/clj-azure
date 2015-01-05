@@ -41,4 +41,20 @@
 (deftest test-list-containers
   (is (= ((list-containers-raw dev-store-account) :status) 200)))
 
+(deftest test-parse-account 
+  (let [acct (parse-account "DefaultEndpointsProtocol=https;AccountName=two10ra;AccountKey=THISISTHEACCOUNTKEY")]
+    (is (= (:account-name acct) "two10ra"))
+    (is (= (:account-key acct) "THISISTHEACCOUNTKEY"))
+    (is (= (:blob-storage-url acct) "https://two10ra.blob.core.windows.net"))))
 
+(deftest test-parse-account-with-http-endpoint
+  (let [acct (parse-account "DefaultEndpointsProtocol=http;AccountName=two10ra;AccountKey=THISISTHEACCOUNTKEY")]
+    (is (= (:account-name acct) "two10ra"))
+    (is (= (:account-key acct) "THISISTHEACCOUNTKEY"))
+    (is (= (:blob-storage-url acct) "http://two10ra.blob.core.windows.net"))))
+
+(deftest test-parse-emulator-account 
+  (let [acct (parse-account "UseDevelopmentStorage=true")]
+    (is (= (:account-name acct) "devstoreaccount1"))))
+
+  

@@ -30,6 +30,27 @@
           "https://YOURACCOUNTNAME.table.core.windows.net"
           "https://YOURACCOUNTNAME.queue.core.windows.net"))
 
+(defn parse-account [account-string] 
+
+  (defn split-part [part] 
+    (let [kv (str/split part #"=")]
+      {(get kv 0) (get kv 1)}))
+
+  (defn get-protocol [parts]
+    (if (contains? parts "DefaultEndpointsProtocol") (get parts "DefaultEndpointsProtocol") "https"))
+
+  (defn to-azure-account [parts]
+    (struct account 
+      (get parts "AccountName")
+      (get parts "AccountKey" )
+      (str (get-protocol parts) "://" (get parts "AccountName") ".blob.core.windows.net")
+      (str (get-protocol parts) "://" (get parts "AccountName") ".table.core.windows.net")
+      (str (get-protocol parts) "://" (get parts "AccountName") ".queue.core.windows.net")))
+
+  (let [parts (into {} (map split-part (str/split account-string #";")))]
+    (if (= (get parts "UseDevelopmentStorage") "true") dev-store-account (to-azure-account parts))))
+
+
 (def x-ms-version "2011-08-18")
 
 (defn now
