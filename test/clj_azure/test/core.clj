@@ -57,4 +57,9 @@
   (let [acct (parse-account "UseDevelopmentStorage=true")]
     (is (= (:account-name acct) "devstoreaccount1"))))
 
+(deftest test-account-name-and-key
+  (let [acct (parse-account "two10ra" "THISISTHEACCOUNTKEY")]
+    (is (= (:account-name acct) "two10ra"))
+    (is (= (:account-key acct) "THISISTHEACCOUNTKEY"))
+    (is (= (:blob-storage-url acct) "https://two10ra.blob.core.windows.net"))))
   
