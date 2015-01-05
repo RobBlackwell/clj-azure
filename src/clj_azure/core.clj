@@ -34,21 +34,21 @@
   ([account-string]
     (defn split-part [part] 
       (let [kv (str/split part #"=")]
-        {(get kv 0) (get kv 1)}))
+        {(keyword (get kv 0)) (get kv 1)}))
 
     (defn get-protocol [parts]
-      (if (contains? parts "DefaultEndpointsProtocol") (get parts "DefaultEndpointsProtocol") "https"))
+      (if (contains? parts :DefaultEndpointsProtocol) (:DefaultEndpointsProtocol parts) "https"))
 
     (defn to-azure-account [parts]
       (struct account 
-        (get parts "AccountName")
-        (get parts "AccountKey" )
-        (str (get-protocol parts) "://" (get parts "AccountName") ".blob.core.windows.net")
-        (str (get-protocol parts) "://" (get parts "AccountName") ".table.core.windows.net")
-        (str (get-protocol parts) "://" (get parts "AccountName") ".queue.core.windows.net")))
+        (:AccountName parts)
+        (:AccountKey parts)
+        (str (get-protocol parts) "://" (:AccountName parts) ".blob.core.windows.net")
+        (str (get-protocol parts) "://" (:AccountName parts) ".table.core.windows.net")
+        (str (get-protocol parts) "://" (:AccountName parts) ".queue.core.windows.net")))
 
     (let [parts (into {} (map split-part (str/split account-string #";")))]
-      (if (= (get parts "UseDevelopmentStorage") "true") dev-store-account (to-azure-account parts))))
+      (if (= (:UseDevelopmentStorage parts) "true") dev-store-account (to-azure-account parts))))
 
   ([account-name account-key] 
     (struct account 
