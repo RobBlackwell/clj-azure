@@ -2,7 +2,7 @@
 ;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
 
 (ns clj-azure.core
-  "A Windows Azure SDK for Clojure developers."
+  "A Microsoft Azure SDK for Clojure developers."
   (:require [clojure.xml] 
             [clojure.string :as str])
   (:use [clojure.string :only [lower-case upper-case]]))
@@ -31,25 +31,28 @@
           "https://YOURACCOUNTNAME.queue.core.windows.net"))
 
 (defn parse-account 
+  "Takes a connection string and returns an account struct"
   ([account-string]
-    (defn split-part [part] 
-      (let [kv (str/split part #"=")]
-        {(keyword (get kv 0)) (get kv 1)}))
+    
+    (letfn [
+      (split-part [part] 
+        (let [kv (str/split part #"=")]
+          {(keyword (get kv 0)) (get kv 1)}))
 
-    (defn get-protocol [parts]
-      (if (contains? parts :DefaultEndpointsProtocol) (:DefaultEndpointsProtocol parts) "https"))
+      (get-protocol [parts]
+        (if (contains? parts :DefaultEndpointsProtocol) (:DefaultEndpointsProtocol parts) "https"))
 
-    (defn to-azure-account [parts]
-      (struct account 
-        (:AccountName parts)
-        (:AccountKey parts)
-        (str (get-protocol parts) "://" (:AccountName parts) ".blob.core.windows.net")
-        (str (get-protocol parts) "://" (:AccountName parts) ".table.core.windows.net")
-        (str (get-protocol parts) "://" (:AccountName parts) ".queue.core.windows.net")))
-
-    (let [parts (into {} (map split-part (str/split account-string #";")))]
-      (if (= (:UseDevelopmentStorage parts) "true") dev-store-account (to-azure-account parts))))
-
+      (to-azure-account [parts]
+        (struct account 
+          (:AccountName parts)
+          (:AccountKey parts)
+          (str (get-protocol parts) "://" (:AccountName parts) ".blob.core.windows.net")
+          (str (get-protocol parts) "://" (:AccountName parts) ".table.core.windows.net")
+          (str (get-protocol parts) "://" (:AccountName parts) ".queue.core.windows.net")))
+      ]
+      (let [parts (into {} (map split-part (str/split account-string #";")))]
+        (if (= (:UseDevelopmentStorage parts) "true") dev-store-account (to-azure-account parts))))
+    )
   ([account-name account-key] 
     (struct account 
       account-name
