@@ -3,7 +3,8 @@
 
 (ns clj-azure.core
   "A Windows Azure SDK for Clojure developers."
-  (:require [clojure.xml])
+  (:require [clojure.xml] 
+            [clojure.string :as str])
   (:use [clojure.string :only [lower-case upper-case]]))
 
 (defstruct account

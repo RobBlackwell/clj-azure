@@ -50,7 +50,7 @@
    {:method :put
     :url (format "%s/%s?restype=container" (:blob-storage-url account) container)
     :headers {"Content-Length" "0"}
-    :body ""}))(
+    :body ""}))
 
 (defn get-container-properties-raw
   "Returns all properties and metadata on the container."
