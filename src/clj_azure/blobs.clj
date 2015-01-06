@@ -3,7 +3,7 @@
 
 (ns clj-azure.blobs
   "Access to Windows Azure Blob Storage"
-  (:require clj-http.client)
+  (:require clj-http.lite.client)
   (:require clojure.xml)
   (:use clj-azure.core))
 
@@ -16,14 +16,14 @@
   "Makes an HTTP request to Windows Azure Blob store"
   [account req]
   (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
-    (clj-http.client/request 
+    (clj-http.lite.client/request 
      (remove-header (sign account request) "Content-Length"))))
 
 (defn blob-storage-request-put
   "Makes an HTTP request to Windows Azure Blob store"
   [account req]
   (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
-    (clj-http.client/put (:url req) (remove-header (sign account request) "Content-Length"))))
+    (clj-http.lite.client/put (:url req) (remove-header (sign account request) "Content-Length"))))
 
 
 ;; Low Level REST API
