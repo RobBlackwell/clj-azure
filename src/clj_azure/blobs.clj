@@ -19,6 +19,13 @@
     (clj-http.client/request 
      (remove-header (sign account request) "Content-Length"))))
 
+(defn blob-storage-request-put
+  "Makes an HTTP request to Windows Azure Blob store"
+  [account req]
+  (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
+    (clj-http.client/put (:url req) (remove-header (sign account request) "Content-Length"))))
+
+
 ;; Low Level REST API
 
 (defn list-containers-raw
@@ -45,7 +52,7 @@
 (defn create-container-raw
   "Creates a new container in the given storage account."
   [account container]
-  (blob-storage-request
+  (blob-storage-request-put
    account
    {:method :put
     :url (format "%s/%s?restype=container" (:blob-storage-url account) container)

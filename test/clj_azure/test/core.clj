@@ -38,8 +38,6 @@
 
     (is (= (string-to-sign-1 "myaccount" request) result))))
 
-(deftest test-list-containers
-  (is (= ((list-containers-raw dev-store-account) :status) 200)))
 
 (deftest test-parse-account 
   (let [acct (parse-account "DefaultEndpointsProtocol=https;AccountName=two10ra;AccountKey=THISISTHEACCOUNTKEY")]
@@ -63,3 +61,11 @@
     (is (= (:account-key acct) "THISISTHEACCOUNTKEY"))
     (is (= (:blob-storage-url acct) "https://two10ra.blob.core.windows.net"))))
   
+
+(deftest test-list-containers
+  (is (= ((list-containers-raw dev-store-account) :status) 200)))
+
+(deftest test-create-container
+  (create-container-raw dev-store-account "foobarbaz"))
+
+

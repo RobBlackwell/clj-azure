@@ -16,9 +16,9 @@
 
 (def dev-store-account
   (struct account
-          "devstoreaccount1"
-          "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
-          "http://127.0.0.1:10000/devstoreaccount1"
+          "two10ra"
+          "dmIMUY1mg/qPeOgGmCkO333L26cNcnUA1uMcSSOFMB3cB8LkdDkh02RaYTPLBL8qMqnqazqd6uMxI2bJJEnj0g=="
+          "http://two10ra-blob-core-windows-net-7pxhgywzlvx7.runscope.net"
           "http://127.0.0.1:10002/devstoreaccount1"
           "http://127.0.0.1:10001/devstoreaccount1"))
 
