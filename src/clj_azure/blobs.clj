@@ -107,6 +107,14 @@
     :headers {"Content-Length" (str (count data)) "x-ms-blob-type" "BlockBlob"}
     :body data}))
 
+(defn get-blob
+  "Downloads a blob from a container"
+  [account container blob]
+  (:body (blob-storage-request account {
+    :method :get
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})))
+
+
 ;; Get Blob (REST API)
 ;; Reads or downloads a blob from the system, including its metadata and properties.
 

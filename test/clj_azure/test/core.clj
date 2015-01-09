@@ -74,3 +74,6 @@
 
 (deftest test-put-blob
   (put-blob dev-store-account "foobarbaz" "test.txt" "Hello World"))
+
+(deftest test-get-blob
+  (is (= (get-blob dev-store-account "foobarbaz" "test.txt") "Hello World")))
