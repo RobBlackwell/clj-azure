@@ -114,6 +114,27 @@
     :method :get
     :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})))
 
+;(defn headers-to-map [response]
+;  (prn  response)
+;  (into {} prn (:headers response)))
+
+(defn headers-to-map [response]
+  (into {} (map (fn [kv] { (keyword (get kv 0) ) (get kv 1)}) (:headers response))))
+
+(defn get-blob-properties
+  "Gets the properies for a blob"
+  [account container blob]
+  (headers-to-map (blob-storage-request account {
+    :method :head
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})))
+
+(defn del-blob
+  "Deletes a blob from a container"
+  [account container blob]
+  (= 202 (:status (blob-storage-request account {
+    :method :delete
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )}))))
+
 
 ;; Get Blob (REST API)
 ;; Reads or downloads a blob from the system, including its metadata and properties.
