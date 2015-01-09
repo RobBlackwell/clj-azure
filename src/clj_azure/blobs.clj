@@ -157,6 +157,13 @@
 (defn list-blobs [account container]
   (get-named-elements (:body (list-blobs-raw account container))))
 
+(defn create-container [account container-name]
+  (try
+    (create-container-raw account container-name)
+    true
+    (catch Exception e 
+      false)))
+
 
 
 

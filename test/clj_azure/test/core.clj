@@ -66,6 +66,11 @@
   (is (= ((list-containers-raw dev-store-account) :status) 200)))
 
 (deftest test-create-container
-  (create-container-raw dev-store-account "foobarbaz"))
+  (create-container dev-store-account "foobarbaz"))
+
+;;; containers which have already been created should return false (unsuccessful)
+(deftest test-create-container
+  (is (= (create-container dev-store-account "foobarbaz") false)))
+
 
 
