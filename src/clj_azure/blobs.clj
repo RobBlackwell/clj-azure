@@ -157,12 +157,14 @@
 (defn list-blobs [account container]
   (get-named-elements (:body (list-blobs-raw account container))))
 
+;;;  we should probably just catch the exceptions for known status codes...
 (defn create-container [account container-name]
   (try
     (create-container-raw account container-name)
     true
     (catch Exception e 
       false)))
+
 
 
 

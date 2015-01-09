@@ -72,5 +72,5 @@
 (deftest test-create-container
   (is (= (create-container dev-store-account "foobarbaz") false)))
 
-
-
+(deftest test-put-blob
+  (put-blob dev-store-account "foobarbaz" "test.txt" "Hello World"))
