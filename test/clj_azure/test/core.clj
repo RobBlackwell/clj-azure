@@ -76,7 +76,7 @@
   (put-blob dev-store-account "foobarbaz" "test.txt" "Hello World"))
 
 (deftest test-get-blob
-  (is (= (get-blob dev-store-account "foobarbaz" "test.txt") "Hello World")))
+  (is (= (:content (get-blob dev-store-account "foobarbaz" "test.txt")) "Hello World")))
 
 (deftest test-get-blob-properties
   (is (= 

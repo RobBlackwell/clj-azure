@@ -107,19 +107,17 @@
     :headers {"Content-Length" (str (count data)) "x-ms-blob-type" "BlockBlob"}
     :body data}))
 
+(defn headers-to-map [response]
+  (into {} (map (fn [kv] { (keyword (get kv 0) ) (get kv 1)}) (:headers response))))
+
 (defn get-blob
   "Downloads a blob from a container"
   [account container blob]
-  (:body (blob-storage-request account {
+  (let [response (blob-storage-request account {
     :method :get
-    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})))
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})]
+    {:content (:body response) :headers (headers-to-map response)}))
 
-;(defn headers-to-map [response]
-;  (prn  response)
-;  (into {} prn (:headers response)))
-
-(defn headers-to-map [response]
-  (into {} (map (fn [kv] { (keyword (get kv 0) ) (get kv 1)}) (:headers response))))
 
 (defn get-blob-properties
   "Gets the properies for a blob"
