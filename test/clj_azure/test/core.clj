@@ -1,6 +1,5 @@
 (ns clj-azure.test.core
   (:use [clj-azure.core])
-  (:use [clj-azure.blobs])
   (:use [clojure.test]))
 
 (deftest test-hmac-string
@@ -62,28 +61,5 @@
     (is (= (:blob-storage-url acct) "https://two10ra.blob.core.windows.net"))))
   
 
-(deftest test-list-containers
-  (is (= ((list-containers-raw dev-store-account) :status) 200)))
-
-(deftest test-create-container
-  (is (= (create-container dev-store-account "foobarbaz") true)))
-
-;;; containers which have already been created should return false (unsuccessful)
-(deftest test-create-container
-  (is (= (create-container dev-store-account "foobarbaz") false)))
-
-(deftest test-put-blob
-  (put-blob dev-store-account "foobarbaz" "test.txt" "Hello World"))
-
-(deftest test-get-blob
-  (is (= (:content (get-blob dev-store-account "foobarbaz" "test.txt")) "Hello World")))
-
-(deftest test-get-blob-properties
-  (is (= 
-    (:x-ms-lease-status 
-      (get-blob-properties dev-store-account "foobarbaz" "test.txt")) "unlocked")))
-
-(deftest test-del-blob
-  (is (= (del-blob dev-store-account "foobarbaz" "test.txt") true )))
 
 

@@ -110,6 +110,9 @@
 (defn headers-to-map [response]
   (into {} (map (fn [kv] { (keyword (get kv 0) ) (get kv 1)}) (:headers response))))
 
+(defn map-to-headers [properties]
+  (into {} (map (fn [kv] { (subs (str (get kv 0)) 1) (get kv 1) } ) properties)))
+
 (defn get-blob
   "Downloads a blob from a container"
   [account container blob]
@@ -133,6 +136,33 @@
     :method :delete
     :url (format "%s/%s/%s" (:blob-storage-url account) container blob )}))))
 
+
+(defn set-blob-properties
+  [account container blob properties]
+  (blob-storage-request
+   account
+   {:method :put
+    :url (format "%s/%s/%s?comp=properties" (:blob-storage-url account) container blob )
+    :headers (into {"Content-Length" "0"} (map-to-headers properties))
+    :body ""
+    }))
+
+(defn get-blob-metadata
+  "Gets the metadata for a blob"
+  [account container blob]
+  (headers-to-map (blob-storage-request account {
+    :method :get
+    :url (format "%s/%s/%s?comp=metadata" (:blob-storage-url account) container blob )})))
+
+(defn set-blob-metadata
+  [account container blob metadata]
+  (blob-storage-request
+   account
+   {:method :put
+    :url (format "%s/%s/%s?comp=metadata" (:blob-storage-url account) container blob )
+    :headers (into {"Content-Length" "0"} (map-to-headers metadata))
+    :body ""
+    }))
 
 ;; Get Blob (REST API)
 ;; Reads or downloads a blob from the system, including its metadata and properties.
