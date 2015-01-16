@@ -1,11 +1,11 @@
 ;;;; azure.blobs
 ;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
 
-(ns azure.blobs
+(ns clj-azure.blobs
   "Access to Windows Azure Blob Storage"
-  (:require clj-http.client)
+  (:require clj-http.lite.client)
   (:require clojure.xml)
-  (:use azure.core))
+  (:use clj-azure.core))
 
 ;; Unfortunately the underlying Apache HttpComponents library doesn't
 ;; allow you to set Content-Length explicitly. The Azure signature
@@ -16,8 +16,15 @@
   "Makes an HTTP request to Windows Azure Blob store"
   [account req]
   (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
-    (clj-http.client/request
+    (clj-http.lite.client/request 
      (remove-header (sign account request) "Content-Length"))))
+
+(defn blob-storage-request-put
+  "Makes an HTTP request to Windows Azure Blob store"
+  [account req]
+  (let [request (add-headers req {"x-ms-date" (now) "x-ms-version" x-ms-version })]
+    (clj-http.lite.client/put (:url req) (remove-header (sign account request) "Content-Length"))))
+
 
 ;; Low Level REST API
 
@@ -45,7 +52,7 @@
 (defn create-container-raw
   "Creates a new container in the given storage account."
   [account container]
-  (blob-storage-request
+  (blob-storage-request-put
    account
    {:method :put
     :url (format "%s/%s?restype=container" (:blob-storage-url account) container)
@@ -100,6 +107,63 @@
     :headers {"Content-Length" (str (count data)) "x-ms-blob-type" "BlockBlob"}
     :body data}))
 
+(defn headers-to-map [response]
+  (into {} (map (fn [kv] { (keyword (get kv 0) ) (get kv 1)}) (:headers response))))
+
+(defn map-to-headers [properties]
+  (into {} (map (fn [kv] { (subs (str (get kv 0)) 1) (get kv 1) } ) properties)))
+
+(defn get-blob
+  "Downloads a blob from a container"
+  [account container blob]
+  (let [response (blob-storage-request account {
+    :method :get
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})]
+    {:content (:body response) :headers (headers-to-map response)}))
+
+
+(defn get-blob-properties
+  "Gets the properies for a blob"
+  [account container blob]
+  (headers-to-map (blob-storage-request account {
+    :method :head
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )})))
+
+(defn del-blob
+  "Deletes a blob from a container"
+  [account container blob]
+  (= 202 (:status (blob-storage-request account {
+    :method :delete
+    :url (format "%s/%s/%s" (:blob-storage-url account) container blob )}))))
+
+
+(defn set-blob-properties
+  [account container blob properties]
+  (blob-storage-request
+   account
+   {:method :put
+    :url (format "%s/%s/%s?comp=properties" (:blob-storage-url account) container blob )
+    :headers (into {"Content-Length" "0"} (map-to-headers properties))
+    :body ""
+    }))
+
+(defn get-blob-metadata
+  "Gets the metadata for a blob"
+  [account container blob]
+  (headers-to-map (blob-storage-request account {
+    :method :get
+    :url (format "%s/%s/%s?comp=metadata" (:blob-storage-url account) container blob )})))
+
+(defn set-blob-metadata
+  [account container blob metadata]
+  (blob-storage-request
+   account
+   {:method :put
+    :url (format "%s/%s/%s?comp=metadata" (:blob-storage-url account) container blob )
+    :headers (into {"Content-Length" "0"} (map-to-headers metadata))
+    :body ""
+    }))
+
 ;; Get Blob (REST API)
 ;; Reads or downloads a blob from the system, including its metadata and properties.
 
@@ -149,6 +213,15 @@
 
 (defn list-blobs [account container]
   (get-named-elements (:body (list-blobs-raw account container))))
+
+;;;  we should probably just catch the exceptions for known status codes...
+(defn create-container [account container-name]
+  (try
+    (create-container-raw account container-name)
+    true
+    (catch Exception e 
+      false)))
+
 
 
 

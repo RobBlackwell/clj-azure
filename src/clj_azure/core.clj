@@ -1,8 +1,10 @@
 ;;;; clj-azure.core
 ;;;; Copyright (c) 2011, Rob Blackwell.  All rights reserved.
 
-(ns azure.core
-  "A Windows Azure SDK for Clojure developers."
+(ns clj-azure.core
+  "A Microsoft Azure SDK for Clojure developers."
+  (:require [clojure.xml] 
+            [clojure.string :as str])
   (:use [clojure.string :only [lower-case upper-case]]))
 
 (defstruct account
@@ -28,12 +30,45 @@
           "https://YOURACCOUNTNAME.table.core.windows.net"
           "https://YOURACCOUNTNAME.queue.core.windows.net"))
 
+(defn parse-account 
+  "Takes a connection string and returns an account struct"
+  ([account-string]
+    
+    (letfn [
+      (split-part [part] 
+        (let [kv (str/split part #"=")]
+          {(keyword (get kv 0)) (get kv 1)}))
+
+      (get-protocol [parts]
+        (if (contains? parts :DefaultEndpointsProtocol) (:DefaultEndpointsProtocol parts) "https"))
+
+      (to-azure-account [parts]
+        (struct account 
+          (:AccountName parts)
+          (:AccountKey parts)
+          (str (get-protocol parts) "://" (:AccountName parts) ".blob.core.windows.net")
+          (str (get-protocol parts) "://" (:AccountName parts) ".table.core.windows.net")
+          (str (get-protocol parts) "://" (:AccountName parts) ".queue.core.windows.net")))
+      ]
+      (let [parts (into {} (map split-part (str/split account-string #";")))]
+        (if (= (:UseDevelopmentStorage parts) "true") dev-store-account (to-azure-account parts))))
+    )
+  ([account-name account-key] 
+    (struct account 
+      account-name
+      account-key
+      (str "https://" account-name ".blob.core.windows.net")
+      (str "https://" account-name ".table.core.windows.net")
+      (str "https://" account-name ".queue.core.windows.net")))
+)
+
+
 (def x-ms-version "2011-08-18")
 
 (defn now
-  "Gets the current date and time in RFC1123 format e.g. Sun, 15 Jun 2008 21:15:07 GMT"
+  "Gets the current date and time in RFC1123 format e.g. Sun, 05 Jun 2008 21:15:07 GMT"
   []
-  (let [f (java.text.SimpleDateFormat. "EEE, d MMM yyyy HH:mm:ss z" )]
+  (let [f (java.text.SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss z" )]
     (do
       (.setTimeZone f (java.util.TimeZone/getTimeZone "GMT"))
       (.format f  (.getTime (java.util.Calendar/getInstance))))))
